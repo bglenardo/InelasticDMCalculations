@@ -1,6 +1,6 @@
 import numpy as np
 import scipy as sp
-
+from InterpolateEfficiencies import InterpolateEfficiency
 
 ################################################################
 
@@ -258,3 +258,33 @@ def CutAndCount90PercentConfXSec(Emin, Emax, exposure, Mdm, A, Z, fn, fp, delta,
     return 6.7 / integs * xsec
   elif nevents == 4: 
     return 8.0 / integs * xsec
+
+
+###########################################################################
+def CutAndCount90PercentConfXSec_Efficiency(Emin,Emax, exposure, Mdm, A, Z, fn, fp, delta, mdens, nevents, eff_txt_file):
+  nPoints = 5000
+  ER = np.linspace(Emin,Emax,nPoints)
+  Rate = np.zeros(len(ER))
+  dE = ER[1] - ER[0]
+  xsec = 1e-40
+  integs = np.zeros(len(delta))
+
+  Efficiency = InterpolateEfficiency(Emin, Emax, nPoints, eff_txt_file)
+
+  for i in range(0,len(delta)):
+     print("delta = %f" % delta[i])
+     Rate = RateVsEnergy(ER, Mdm, A, Z, fn, fp, xsec, delta[i], mdens)*60*60*24*exposure
+     integs[i] = sum(np.multiply(Rate,Efficiency))*dE 
+
+  if nevents == 0:
+    return 2.3 / integs * xsec
+  elif nevents == 1:
+    return 3.9 / integs * xsec
+  elif nevents == 3:
+    return 6.7 / integs * xsec
+  elif nevents == 4: 
+    return 8.0 / integs * xsec
+  elif nevents == 24:
+    return 50.0 / integs * xsec
+
+
